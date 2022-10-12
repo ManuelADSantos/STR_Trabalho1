@@ -4,6 +4,8 @@
 #include "func.h"
 #include <time.h>
 
+#include "timestamps.h"
+
 #define MILLION 1000000.0;
 
 int main(int argc, char **argv)
@@ -29,17 +31,19 @@ int main(int argc, char **argv)
       return -1;
     }
 
-    printf("F1 start sec: %ld  ||| F2 start nsec: %ld\n\n", start.tv_sec, start.tv_nsec);
-    printf("F1 stop sec: %ld  ||| F2 stop nsec: %ld\n\n", stop.tv_sec, stop.tv_nsec);
+    printf("F1 start sec: %ld  ||| F1 start nsec: %ld\n\n", start.tv_sec, start.tv_nsec);
+    printf("F1 stop sec: %ld  ||| F1 stop nsec: %ld\n\n", stop.tv_sec, stop.tv_nsec);
 
-    calc = (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / MILLION;
-    printf("  (func1) = %lf ms (iteracao %d)\n", calc, i);
+    calc = time_between_timestamp(start, stop);
+    printf("  (func1) = %lf ms (iteracao %d)\n\n\n\n", calc, i);
     if (calc < time1)
     {
       printf("Novo melhor (func1) = %lf ms (iteracao %d)\n", calc, i);
       time1 = calc;
     }
   }
+
+  printf(" ---> O melhor tempo foi %lf ms (func1)\n\n\n", time1);
 
   printf("\n");
   // ========== Análise func2 ==========

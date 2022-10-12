@@ -11,7 +11,7 @@ int main()
         printf("start_sec = %ld || start_nsec = %ld\n\n", test_start.tv_sec, test_start.tv_nsec);
     }
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1000; i++)
     {
     }
 
@@ -42,7 +42,26 @@ struct timespec sum_timestamp(struct timespec a, struct timespec b)
 struct timespec sub_timestamp(struct timespec a, struct timespec b)
 {
     struct timespec result;
-    result.tv_sec = b.tv_sec - a.tv_sec;
-    result.tv_nsec = b.tv_nsec - a.tv_nsec;
+    if (a.tv_sec <= b.tv_sec)
+    {
+        result.tv_sec = b.tv_sec - a.tv_sec;
+        result.tv_nsec = b.tv_nsec - a.tv_nsec;
+    }
+    else
+    // Caso edge
+    {
+        result.tv_sec = a.tv_sec - b.tv_sec - 1;
+        result.tv_nsec = (1000000000 - b.tv_nsec) + a.tv_nsec;
+    }
+
+    return result;
+}
+
+double time_between_timestamp(struct timespec begin, struct timespec end)
+{
+    struct timespec calc;
+    calc = sub_timestamp(begin, end);
+    double result = (calc.tv_sec) + (calc.tv_nsec) / 1000000.0;
+
     return result;
 }
