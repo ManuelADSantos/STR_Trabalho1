@@ -2,7 +2,7 @@
 #include "time.h"
 #include "stdio.h"
 
-int main()
+/*int main()
 {
     struct timespec test_start, test_end, test_result;
 
@@ -29,7 +29,7 @@ int main()
     printf("result_sub_sec = %ld || result_sub_nsec = %ld\n\n", test_result.tv_sec, test_result.tv_nsec);
 
     return 0;
-}
+}*/
 
 struct timespec sum_timestamp(struct timespec a, struct timespec b)
 {
