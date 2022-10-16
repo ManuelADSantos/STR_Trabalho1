@@ -1,116 +1,72 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
-#include "func.h"
 #include <time.h>
+#include <limits.h>
+#include <sched.h>
+#include <unistd.h>
+#include <sys/mman.h>
 
+#include "func.h"
 #include "timestamps.h"
 
 #define MILLION 1000000.0
-#define TEST_ITERATIONS 20
+#define TEST_ITERATIONS 50
 
 int main(int argc, char **argv)
 {
   struct timespec start, stop;
-  double time1 = 1000, time2 = 1000, time3 = 1000, calc = 0;
+  double calc = 0;
+  double times[3][2] = {{__DBL_MAX__, 0}, {__DBL_MAX__, 0}, {__DBL_MAX__, 0}};
+  cpu_set_t mask;
+
+  if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1)
+    return -1;
+
+  CPU_ZERO(&mask);
+  CPU_SET(0, &mask);
+  if (sched_setaffinity(getpid(), sizeof(mask), &mask) == -1)
+    return -1;
 
   printf("\n");
-  // ========== Análise func1 ==========
-  for (int i = 0; i < TEST_ITERATIONS; i++)
+
+  for (int j = 0; j < 3; j++)
   {
-    if (clock_gettime(CLOCK_REALTIME, &start) == -1)
+
+    for (int i = 0; i < TEST_ITERATIONS; i++)
     {
-      perror("clock gettime");
-      return -1;
+      if (clock_gettime(CLOCK_REALTIME, &start) == -1)
+        return -1;
+
+      if (j == 0)
+        f1(0, 0);
+      if (j == 1)
+        f2(0, 0);
+      if (j == 2)
+        f3(0, 0);
+
+      if (clock_gettime(CLOCK_REALTIME, &stop) == -1)
+        return -1;
+
+      calc = time_between_timestamp(start, stop);
+      if (calc < times[j][0])
+      {
+        times[j][0] = calc;
+        printf("Novo min (func1) = %lf ms (iteracao %d)\n", calc, i);
+      }
+      if (calc > times[j][1])
+      {
+        times[j][1] = calc;
+        printf("Novo MAX (func1) = %lf ms (iteracao %d)\n", calc, i);
+      }
     }
-
-    f1(0, 0);
-
-    if (clock_gettime(CLOCK_REALTIME, &stop) == -1)
-    {
-      perror("clock gettime");
-      return -1;
-    }
-
-    // printf("    F1 start sec: %ld  ||| F1 start nsec: %ld\n", start.tv_sec, start.tv_nsec);
-    // printf("    F1 stop sec: %ld  ||| F1 stop nsec: %ld\n", stop.tv_sec, stop.tv_nsec);
-
-    calc = time_between_timestamp(start, stop);
-    // printf("  (func1) = %lf ms (iteracao %d)\n", calc, i);
-    if (calc < time1)
-    {
-      printf("Novo melhor (func1) = %lf ms (iteracao %d)\n", calc, i);
-      time1 = calc;
-    }
+    printf("\n");
   }
 
-  // printf(" ---> O melhor tempo foi %lf ms (func1)\n\n\n", time1);
-
-  printf("\n");
-  //  ========== Análise func2 ==========
-  for (int i = 0; i < TEST_ITERATIONS; i++)
-  {
-    if (clock_gettime(CLOCK_REALTIME, &start) == -1)
-    {
-      perror("clock gettime");
-      return -1;
-    }
-
-    f2(0, 0);
-
-    if (clock_gettime(CLOCK_REALTIME, &stop) == -1)
-    {
-      perror("clock gettime");
-      return -1;
-    }
-
-    // printf("F1 start sec: %ld  ||| F1 start nsec: %ld\n\n", start.tv_sec, start.tv_nsec);
-    // printf("F1 stop sec: %ld  ||| F1 stop nsec: %ld\n\n", stop.tv_sec, stop.tv_nsec);
-
-    calc = time_between_timestamp(start, stop);
-    // printf("  (func2) = %lf ms (iteracao %d)\n", calc, i);
-    if (calc < time2)
-    {
-      printf("Novo melhor (func2) = %lf ms (iteracao %d)\n", calc, i);
-      time2 = calc;
-    }
-  }
-
-  // printf(" ---> O melhor tempo foi %lf ms (func2)\n\n\n", time2);
-  printf("\n");
-  //  ========== Análise func3 ==========
-  for (int i = 0; i < TEST_ITERATIONS; i++)
-  {
-    if (clock_gettime(CLOCK_REALTIME, &start) == -1)
-    {
-      perror("clock gettime");
-      return -1;
-    }
-
-    f3(0, 0);
-
-    if (clock_gettime(CLOCK_REALTIME, &stop) == -1)
-    {
-      perror("clock gettime");
-      return -1;
-    }
-
-    // printf("F1 start sec: %ld  ||| F1 start nsec: %ld\n\n", start.tv_sec, start.tv_nsec);
-    // printf("F1 stop sec: %ld  ||| F1 stop nsec: %ld\n\n", stop.tv_sec, stop.tv_nsec);
-
-    calc = time_between_timestamp(start, stop);
-    // printf("  (func3) = %lf ms (iteracao %d)\n", calc, i);
-    if (calc < time3)
-    {
-      printf("Novo melhor (func3) = %lf ms (iteracao %d)\n", calc, i);
-      time3 = calc;
-    }
-  }
-
-  // printf(" ---> O melhor tempo foi %lf ms (func3)\n\n\n", time3);
-  printf("\n");
-
-  printf(" Tempo f1: %lf ms\n Tempo f2: %lf ms\n Tempo f3: %lf ms\n\n", time1, time2, time3);
+  printf(" === Tempos Minimos ===\n    f1: %lf ms\n    f2: %lf ms\n    f3: %lf ms\n\n",
+         times[0][0], times[1][0], times[2][0]);
+  printf(" === Tempos Maximos ===\n    f1: %lf ms\n    f2: %lf ms\n    f3: %lf ms\n\n",
+         times[0][1], times[1][1], times[2][1]);
 
   return (0);
 }
