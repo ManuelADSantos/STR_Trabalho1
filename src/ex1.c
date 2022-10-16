@@ -12,6 +12,9 @@
 
 #define TEST_ITERATIONS 20
 
+// =================================================================================================
+//                                              MAIN
+// =================================================================================================
 int main(int argc, char **argv)
 {
   struct timespec start, stop;
@@ -20,32 +23,43 @@ int main(int argc, char **argv)
   cpu_set_t mask;
 
   if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1)
-    return -1;
+  {
+    perror("mlockall failed");
+    exit();
+  }
 
   CPU_ZERO(&mask);
   CPU_SET(0, &mask);
   if (sched_setaffinity(getpid(), sizeof(mask), &mask) == -1)
-    return -1;
+  {
+    perror("sched_setaffinity failed");
+    exit();
+  }
 
   printf("\n");
 
   for (int j = 0; j < 3; j++)
   {
-
     for (int i = 0; i < TEST_ITERATIONS; i++)
     {
       if (clock_gettime(CLOCK_REALTIME, &start) == -1)
-        return -1;
+      {
+        perror("clock gettime");
+        exit();
+      }
 
       if (j == 0)
-        f1(0, 0);
+        f1(1, 0);
       if (j == 1)
-        f2(0, 0);
+        f2(1, 0);
       if (j == 2)
-        f3(0, 0);
+        f3(1, 0);
 
       if (clock_gettime(CLOCK_REALTIME, &stop) == -1)
-        return -1;
+      {
+        perror("clock gettime");
+        exit();
+      }
 
       calc = time_between_timestamp(start, stop);
       if (calc < times[j][0])
