@@ -10,8 +10,7 @@
 #include "func.h"
 #include "timestamps.h"
 
-#define MILLION 1000000.0
-#define TEST_ITERATIONS 50
+#define TEST_ITERATIONS 20
 
 int main(int argc, char **argv)
 {

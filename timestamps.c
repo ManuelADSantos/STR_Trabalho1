@@ -31,14 +31,6 @@
     return 0;
 }*/
 
-struct timespec sum_timestamp(struct timespec begin, struct timespec end)
-{
-    struct timespec result;
-    result.tv_sec = begin.tv_sec + end.tv_sec;
-    result.tv_nsec = begin.tv_nsec + end.tv_nsec;
-    return result;
-}
-
 struct timespec sub_timestamp(struct timespec begin, struct timespec end)
 {
     struct timespec result;
