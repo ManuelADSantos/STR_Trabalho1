@@ -45,8 +45,8 @@ struct timespec sub_timestamp(struct timespec begin, struct timespec end)
     if (end.tv_nsec <= begin.tv_nsec)
     {
         // Caso edge
-        result.tv_sec = begin.tv_sec - end.tv_sec - 1;
-        result.tv_nsec = (1000000000 - end.tv_nsec) + begin.tv_nsec;
+        result.tv_sec = end.tv_sec - begin.tv_sec - 1.0;
+        result.tv_nsec = (1000000000.0 - begin.tv_nsec) + end.tv_nsec;
     }
     else
     {
@@ -61,7 +61,7 @@ double time_between_timestamp(struct timespec begin, struct timespec end)
 {
     struct timespec calc;
     calc = sub_timestamp(begin, end);
-    double result = (calc.tv_sec) + (calc.tv_nsec) / 1000000.0;
+    double result = (calc.tv_sec) * 1000.0 + (calc.tv_nsec) / 1000000.0;
 
     return result;
 }
