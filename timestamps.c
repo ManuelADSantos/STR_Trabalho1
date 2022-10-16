@@ -31,27 +31,27 @@
     return 0;
 }*/
 
-struct timespec sum_timestamp(struct timespec a, struct timespec b)
+struct timespec sum_timestamp(struct timespec begin, struct timespec end)
 {
     struct timespec result;
-    result.tv_sec = a.tv_sec + b.tv_sec;
-    result.tv_nsec = a.tv_nsec + b.tv_nsec;
+    result.tv_sec = begin.tv_sec + end.tv_sec;
+    result.tv_nsec = begin.tv_nsec + end.tv_nsec;
     return result;
 }
 
-struct timespec sub_timestamp(struct timespec a, struct timespec b)
+struct timespec sub_timestamp(struct timespec begin, struct timespec end)
 {
     struct timespec result;
-    if (a.tv_sec <= b.tv_sec)
+    if (end.tv_nsec <= begin.tv_nsec)
     {
-        result.tv_sec = b.tv_sec - a.tv_sec;
-        result.tv_nsec = b.tv_nsec - a.tv_nsec;
+        // Caso edge
+        result.tv_sec = begin.tv_sec - end.tv_sec - 1;
+        result.tv_nsec = (1000000000 - end.tv_nsec) + begin.tv_nsec;
     }
     else
-    // Caso edge
     {
-        result.tv_sec = a.tv_sec - b.tv_sec - 1;
-        result.tv_nsec = (1000000000 - b.tv_nsec) + a.tv_nsec;
+        result.tv_sec = end.tv_sec - begin.tv_sec;
+        result.tv_nsec = end.tv_nsec - begin.tv_nsec;
     }
 
     return result;
