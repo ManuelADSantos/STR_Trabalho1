@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <limits.h>
 #include <sched.h>
@@ -26,7 +27,7 @@ int main(int argc, char **argv)
   if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1)
   {
     perror("mlockall failed");
-    exit();
+    exit(1);
   }
 
   // Set CPU affinity (run the process only on CPU 0)
@@ -35,7 +36,7 @@ int main(int argc, char **argv)
   if (sched_setaffinity(getpid(), sizeof(mask), &mask) == -1)
   {
     perror("sched_setaffinity failed");
-    exit();
+    exit(1);
   }
 
   printf("\n");
@@ -49,7 +50,7 @@ int main(int argc, char **argv)
       if (clock_gettime(CLOCK_REALTIME, &start) == -1)
       {
         perror("clock gettime");
-        exit();
+        exit(1);
       }
 
       if (j == 0)
@@ -63,7 +64,7 @@ int main(int argc, char **argv)
       if (clock_gettime(CLOCK_REALTIME, &stop) == -1)
       {
         perror("clock gettime");
-        exit();
+        exit(1);
       }
 
       // Calculate time between timestamps
