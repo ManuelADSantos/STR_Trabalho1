@@ -54,11 +54,11 @@ int main(int argc, char **argv)
       }
 
       if (j == 0)
-        f1(1, 0);
+        f1(1, 1);
       if (j == 1)
-        f2(1, 0);
+        f2(1, 1);
       if (j == 2)
-        f3(1, 0);
+        f3(1, 1);
 
       // Get timestamp after computation
       if (clock_gettime(CLOCK_REALTIME, &stop) == -1)
