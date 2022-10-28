@@ -1,6 +1,7 @@
 *
 !*.c
 !*.h
+!*.o
 !*.md
 !*.pdf
 !*.gitignore
