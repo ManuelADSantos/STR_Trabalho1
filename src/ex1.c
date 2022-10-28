@@ -11,7 +11,7 @@
 #include "func.h"
 #include "timestamps.h"
 
-#define TEST_ITERATIONS 100
+#define TEST_ITERATIONS 50
 
 // =================================================================================================
 //                                              MAIN
