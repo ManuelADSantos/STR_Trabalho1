@@ -12,6 +12,8 @@
 #include "timestamps.h"
 
 #define TEST_ITERATIONS 50
+#define CLASS 1
+#define GROUP 1
 
 // =================================================================================================
 //                                              MAIN
@@ -54,11 +56,11 @@ int main(int argc, char **argv)
       }
 
       if (j == 0)
-        f1(1, 1);
+        f1(CLASS, GROUP);
       if (j == 1)
-        f2(1, 1);
+        f2(CLASS, GROUP);
       if (j == 2)
-        f3(1, 1);
+        f3(CLASS, GROUP);
 
       // Get timestamp after computation
       if (clock_gettime(CLOCK_REALTIME, &stop) == -1)

@@ -12,30 +12,6 @@
 #define CLASS 1
 #define GROUP 1
 
-/*
- *  struct timespec{
- *      time_t tv_sec; // time in seconds
- *      long tv_nsec;  // time in nanoseconds
- *  }
- *
- * // Calculate time between timestamps
-      calc = time_between_timestamp(start, stop);
-      // Record minimum and maximum times
-      if (calc < times[j][0])
-      {
-        times[j][0] = calc;
-        printf("Novo min (func1) = %lf ms (iteracao %d)\n", calc, i);
-      }
-      if (calc > times[j][1])
-      {
-        times[j][1] = calc;
-        printf("Novo MAX (func1) = %lf ms (iteracao %d)\n", calc, i);
-      }
- *
- *
- *
- */
-
 struct timespec timeStructZero;
 
 typedef struct // table to register all wanted times
@@ -49,21 +25,6 @@ typedef struct // table to register all wanted times
 
 int counter = 0;
 LogTable entryTable[20];
-
-/*
- * sched_setparam, sched_getparam - set and get scheduling parameters
- */
-
-/*
- * int sched_setparam(pid_t pid, const struct sched_param *param);
- *
- * and
- *
- * struct sched_param {
- *    ...
- *         int sched_priority;
- *    ...};
- */
 
 // Rate monotonic scheduling is an optimal fixed-priority policy where the higher the frequency (1/period) of a task, the higher is its priority.
 
@@ -177,7 +138,7 @@ void *t1(void *arguments) // threads for function f1
 
         if (sleepTime.tv_nsec > 0)
         {
-            clock_nanosleep(CLOCK_MONOTONIC, 0, &sleep, NULL);
+            clock_nanosleep(CLOCK_MONOTONIC, 0, &sleepTime, NULL);
         }
 
         // printf ("A thread 1 demorou %lds:%ldus\n", sDiff, nDiff/1000);
@@ -193,7 +154,7 @@ int main(int argc, char **argv)
     pthread_t threads[3];
     int i, code = 0;
 
-    printf("\nPractical assigment 1 Exercice number 3\n");
+    printf("\nPractical assigment 1 Exercise number 3\n");
 
     // only use one core
     cpu_set_t CPUmask;    // bitset where each bit represents a CPU
@@ -245,9 +206,6 @@ int main(int argc, char **argv)
         exit(1);
     }
     // ==================================
-    
-
-    
 
     return 0;
 }
