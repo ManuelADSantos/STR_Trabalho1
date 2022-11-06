@@ -13,7 +13,7 @@
 #define GROUP 1
 
 struct timespec timeStructZero;
-
+const void (*func[])(int, int) = {f1, f2, f3};
 typedef struct // table to register all wanted times
 {
     int task;
@@ -26,9 +26,40 @@ typedef struct // table to register all wanted times
 int counter = 0;
 LogTable entryTable[20];
 
-// Rate monotonic scheduling is an optimal fixed-priority policy where the higher the frequency (1/period) of a task, the higher is its priority.
+struct timespec sub_timestamp(struct timespec begin, struct timespec end)
+{
+    struct timespec result;
+    if (end.tv_nsec <= begin.tv_nsec)
+    {
+        // Caso edge
+        result.tv_sec = end.tv_sec - begin.tv_sec - 1.0;
+        result.tv_nsec = (1000000000.0 - begin.tv_nsec) + end.tv_nsec;
+    }
+    else
+    {
+        result.tv_sec = end.tv_sec - begin.tv_sec;
+        result.tv_nsec = end.tv_nsec - begin.tv_nsec;
+    }
 
-void *t1(void *arguments) // threads for function f1
+    return result;
+}
+// somar dois timestamps
+struct timespec sumTimes(struct timespec *a, struct timespec *b)
+{
+    struct timespec calc;
+    calc.tv_nsec = a->tv_nsec + b->tv_nsec;
+    calc.tv_sec = a->tv_sec + b->tv_sec;
+    if (calc.tv_nsec > (long int)1e9 - 1)
+    {
+        calc.tv_sec++;
+        calc.tv_nsec = calc.tv_nsec % (long int)1e9; // resto da divisão inteira
+    }
+    return calc;
+}
+
+// Rate monotonic scheduling - the higher the frequency (1/period) of a task, the higher is its priority
+
+void *t1(void *arguments) // thread for function f1
 {
     struct timespec endTime, deadlineTime, beginTime, activationTime, sleepTime;
     deadlineTime.tv_sec = 0;
@@ -78,12 +109,13 @@ void *t1(void *arguments) // threads for function f1
 
         if (deadlineTime.tv_nsec >= 1E9)
         {
-            // corrects the seconds and nanoseconds if the nanoseconds reset to zero
-            deadlineTime.tv_sec += 1; // IMPORTANT: this code only works if the time diff is less than a second!!!
+            // corrects the seconds and nanoseconds
+            deadlineTime.tv_sec += 1; // add 1 second
             deadlineTime.tv_nsec -= 1E9;
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &beginTime);                  // get the task' begin time
+        clock_gettime(CLOCK_MONOTONIC, &beginTime); // get the task' begin time
+
         beginTime.tv_sec = beginTime.tv_sec - timeStructZero.tv_sec; // vamos preparar esse tempo para o apontar na tabela
         beginTime.tv_nsec = beginTime.tv_nsec - timeStructZero.tv_nsec;
 
