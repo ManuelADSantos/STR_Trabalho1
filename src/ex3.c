@@ -310,7 +310,7 @@ int main(int argc, char **argv)
     // Create thread:
     int threadReturn;
     threadReturn = pthread_create(&threads[i], NULL, t1, NULL); // On success, pthread_create() returns 0; on error, it returns an error number
-    if (!threadReturn)
+    if (threadReturn != 0)
     {
         printf("\nfailed creating thread for f1.\n");
         exit(1);
@@ -330,7 +330,7 @@ int main(int argc, char **argv)
     }
 
     threadReturn = pthread_create(&threads[i], NULL, t2, NULL);
-    if (!threadReturn)
+    if (threadReturn != 0)
     {
         printf("\nfailed creating thread for f2.\n");
         exit(1);
@@ -349,7 +349,7 @@ int main(int argc, char **argv)
     }
 
     threadReturn = pthread_create(&threads[i], NULL, t3, NULL);
-    if (!threadReturn)
+    if (threadReturn != 0)
     {
         printf("\nfailed creating thread for f3.\n");
         exit(1);
