@@ -25,20 +25,18 @@ typedef struct // table to register all wanted times
     struct timespec deadline;
 } LogTable;
 
-LogTable entryTable[50]; // table to register all wanted times
-struct timespec zero;    // to calculate the time difference
+LogTable entryTable[1000]; // table to register all wanted times
+struct timespec zero;      // to calculate the time difference
 int counter = 0;
 
 // Rate monotonic scheduling - the higher the frequency (1/period) of a task, the higher is its priority
 
 void *t1(void *arguments) // threads for function f1
 {
+    printf("\n\nIm in function T1\n\n");
     struct timespec endTime, deadlineTime, beginTime, activationTime, sleepTime;
     deadlineTime.tv_sec = 0;
     deadlineTime.tv_nsec = 0;
-
-    // long sDiff;
-    // long nDiff;
     struct timespec Diff;
 
     int priority = 30; // f1 has the highest priority according to RMPO - bigger frequency => higher priority
@@ -46,13 +44,7 @@ void *t1(void *arguments) // threads for function f1
     struct sched_param threadParam; // holds thread parameters
     threadParam.sched_priority = priority;
 
-    /*
-     * int pthread_setschedparam(pthread_t thread, int policy, const struct sched_param *param);
-     *
-     * This function sets the scheduling policy and parameters of the thread.
-     * Policy specifies the new scheduling policy for thread.
-     */
-
+    int returnValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &threadParam);
     if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &threadParam) != 0) // SCHED_FIFO can be used only with static priorities higher than 0
     {                                                                         // pthread_self - obtain ID of the calling thread
         printf("Failed while atributing task priority \n");
@@ -66,12 +58,12 @@ void *t1(void *arguments) // threads for function f1
                                                                         * by policy and param, respectively
                                                                         */
     {
-        printf("Error getting priority... \n");
+        printf("Error getting priority of thread 1... \n");
         exit(1);
     }
     printf("Priority of thread 1: %d\n", parameter.sched_priority);
 
-    while (deadlineTime.tv_sec < 6)
+    while (deadlineTime.tv_sec < 6.0)
     {
         deadlineTime.tv_nsec += 1E8;
 
@@ -96,26 +88,8 @@ void *t1(void *arguments) // threads for function f1
         clock_gettime(CLOCK_MONOTONIC, &endTime); // get task's end time
         Diff = difference(zero, endTime);         // Diff é a diferença entre o tempo de fim e o tempo zero
                                                   // "Diff" é o tempo que a tarefa demorou a ser executada
-        /* sDiff = endTime.tv_sec - zero.tv_sec;
-        nDiff = endTime.tv_nsec - zero.tv_nsec;
 
-        if (nDiff < 0)
-        {
-            sDiff -= 1;
-            nDiff += 1E9;
-        }
-        */
         sleepTime = difference(Diff, deadlineTime); // sleepTime = deadlineTime - endTime
-
-        /*sleepTime.tv_sec = deadlineTime.tv_sec - sDiff;
-        sleepTime.tv_nsec = deadlineTime.tv_nsec - nDiff;
-
-        if (sleepTime.tv_nsec < 0)
-        {
-            sleepTime.tv_sec -= 1;
-            sleepTime.tv_nsec += 1E9;
-        }
-        */
 
         entryTable[counter].deadline = deadlineTime;
         entryTable[counter].activation = activationTime;
@@ -141,6 +115,7 @@ void *t1(void *arguments) // threads for function f1
 // create threads for function f2
 void *t2(void *arguments)
 {
+    printf("\n\nIm in function T2\n\n");
     struct timespec endTime, deadlineTime, beginTime, activationTime, sleepTime;
     deadlineTime.tv_sec = 0;
     deadlineTime.tv_nsec = 0;
@@ -172,7 +147,7 @@ void *t2(void *arguments)
 
         clock_gettime(CLOCK_MONOTONIC, &beginTime); // get the task' begin time
         beginTime = difference(zero, beginTime);
-
+        printf("estou %d aqui", entryTable->task);
         func[1](2, 2); // calls the function f2
         // f2(CLASS, GROUP); // call function f2
 
@@ -201,8 +176,9 @@ void *t2(void *arguments)
 // ========================================================================================================
 // ========================================================================================================
 
-void *t3(void *arguments) // threads for function f2
+void *t3(void *arguments) // threads for function f3
 {
+    printf("\n\nIm in function T3\n\n");
     struct timespec endTime, deadlineTime, beginTime, activationTime, sleepTime;
     deadlineTime.tv_sec = 0;
     deadlineTime.tv_nsec = 0;
@@ -281,13 +257,14 @@ int main(int argc, char **argv)
     }
     CPU_ZERO(&set);
     CPU_SET(0, &set);
+    printf("mask cpu 0\n");
     if (sched_setaffinity(0, sizeof(cpu_set_t), &set) == -1)
     {
         perror("sched_setaffinity failed");
         exit(1);
     }
 
-    printf("creating thread for F1.\n");
+    printf("main: creating thread for F1.\n");
     threads[i] = i;
 
     inheritsched1 = PTHREAD_EXPLICIT_SCHED; // Inherit scheduler = PTHREAD_INHERIT_SCHED
@@ -307,6 +284,7 @@ int main(int argc, char **argv)
         printf("Failed attributing inherence attribuits 1.\n");
         exit(1);
     }
+    printf("Inherence of attribuits 1 done.\n");
     // Create thread:
     int threadReturn;
     threadReturn = pthread_create(&threads[i], NULL, t1, NULL); // On success, pthread_create() returns 0; on error, it returns an error number
@@ -315,7 +293,7 @@ int main(int argc, char **argv)
         printf("\nfailed creating thread for f1.\n");
         exit(1);
     }
-
+    printf("main: Thread 1 created.\n");
     // ============================ F2 ==============================
     i++; // increment counter i to create the next thread
 
@@ -328,14 +306,14 @@ int main(int argc, char **argv)
         printf("Failed attributing inherence attribuits 2.\n");
         exit(1);
     }
-
+    printf("Inherence of attribuits 2 done.\n");
     threadReturn = pthread_create(&threads[i], NULL, t2, NULL);
     if (threadReturn != 0)
     {
         printf("\nfailed creating thread for f2.\n");
         exit(1);
     }
-
+    printf("main: Thread 2 created.\n");
     // ============================ F3 ==============================
     i++;
     printf("\nCreating thread for F3\n");
@@ -347,14 +325,14 @@ int main(int argc, char **argv)
         printf("Failed attributing inherence attribuits 3.\n");
         exit(1);
     }
-
+    printf("Inherence of attribuits 3 done.\n");
     threadReturn = pthread_create(&threads[i], NULL, t3, NULL);
     if (threadReturn != 0)
     {
         printf("\nfailed creating thread for f3.\n");
         exit(1);
     }
-
+    printf("main: Thread 3 created.\n");
     printf("\nFinished creating all threads.\n");
     i = 0; // reset counter
 
