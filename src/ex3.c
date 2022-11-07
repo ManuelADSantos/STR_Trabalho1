@@ -1,3 +1,5 @@
+// sudo gcc -Wall -O2 -D_REENTRANT ex3.c func.o -o ex3 -lpthread -lrt
+
 #define _GNU_SOURCE // must be before all includes /* To get pthread_getattr_np() declaration */
 #include <stdio.h>
 #include <time.h> //clock_gettime
@@ -391,6 +393,13 @@ int main(int argc, char **argv)
             printf("Task %d met deadline.\n", entryTable[j].task);
         }
 
+        printf("Task %d\n", entryTable[j].task);
+        printf("Activation: %ld.%ld\n", entryTable[j].activation.tv_sec, entryTable[j].activation.tv_nsec);
+        printf("Deadline: %ld.%ld\n", entryTable[j].deadline.tv_sec, entryTable[j].deadline.tv_nsec);
+        printf("Begin: %ld.%ld\n", entryTable[j].begin.tv_sec, entryTable[j].begin.tv_nsec);
+        printf("End: %ld.%ld\n", entryTable[j].end.tv_sec, entryTable[j].end.tv_nsec);
+        printf("Response time: %ld.%ld\n", responseTime.tv_sec, responseTime.tv_nsec);
+
         // calculate the response time
         responseTime = difference(entryTable[j].activation, entryTable[j].end);
         switch (entryTable[j].task)
@@ -436,17 +445,10 @@ int main(int argc, char **argv)
             break;
             j++;
         }
-        for (int i = 0; i < 3; i++)
-        {
-            jitter[i] = difference(smallestTime[i], biggestTime[i]); // calculate the jitter
-        }
-
-        printf("Task %d\n", entryTable[j].task);
-        printf("Activation: %ld.%ld\n", entryTable[j].activation.tv_sec, entryTable[j].activation.tv_nsec);
-        printf("Deadline: %ld.%ld\n", entryTable[j].deadline.tv_sec, entryTable[j].deadline.tv_nsec);
-        printf("Begin: %ld.%ld\n", entryTable[j].begin.tv_sec, entryTable[j].begin.tv_nsec);
-        printf("End: %ld.%ld\n", entryTable[j].end.tv_sec, entryTable[j].end.tv_nsec);
-        printf("Response time: %ld.%ld\n", responseTime.tv_sec, responseTime.tv_nsec);
+    }
+    for (int i = 0; i < 3; i++)
+    {
+        jitter[i] = difference(smallestTime[i], biggestTime[i]); // calculate the jitter
         printf("Jitter: %ld.%ld\n", jitter[i].tv_sec, jitter[i].tv_nsec);
     }
     return 0;
