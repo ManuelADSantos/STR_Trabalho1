@@ -1,5 +1,3 @@
-// sudo gcc -Wall -O2 -D_REENTRANT ex3.c func.o -o ex3 -lpthread -lrt
-
 #define _GNU_SOURCE // must be before all includes /* To get pthread_getattr_np() declaration */
 #include <stdio.h>
 #include <time.h> //clock_gettime
@@ -8,12 +6,15 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/mman.h> //mlockall
+
 #include "func.h"
+#include "timestamps.h"
 
 #define CLASS 1
 #define GROUP 1
+#define THREADS_NUM 3
 
-struct timespec difference(const struct timespec begin, const struct timespec end);
+// struct timespec difference(const struct timespec begin, const struct timespec end);
 const void (*func[])(int, int) = {f1, f2, f3};
 
 typedef struct // table to register all wanted times
@@ -31,6 +32,9 @@ int counter = 0;
 
 // Rate monotonic scheduling - the higher the frequency (1/period) of a task, the higher is its priority
 
+// ========================================================================================================
+// ========================================================================================================
+// ========================================================================================================
 void *t1(void *arguments) // threads for function f1
 {
     printf("\n\nIm in function T1\n\n");
@@ -44,7 +48,8 @@ void *t1(void *arguments) // threads for function f1
     struct sched_param threadParam; // holds thread parameters
     threadParam.sched_priority = priority;
 
-    int returnValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &threadParam);
+    // int returnValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &threadParam);
+
     if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &threadParam) != 0) // SCHED_FIFO can be used only with static priorities higher than 0
     {                                                                         // pthread_self - obtain ID of the calling thread
         printf("Failed while atributing task priority \n");
@@ -81,15 +86,15 @@ void *t1(void *arguments) // threads for function f1
         // The CLOCK_MONOTONIC clock is not affected by discontinuous jumps in the system time
 
         clock_gettime(CLOCK_MONOTONIC, &beginTime); // get the task' begin time
-        beginTime = difference(zero, beginTime);
+        beginTime = sub_timestamp(zero, beginTime);
 
         func[0](1, 1); // f1(CLASS, GROUP);
 
         clock_gettime(CLOCK_MONOTONIC, &endTime); // get task's end time
-        Diff = difference(zero, endTime);         // Diff é a diferença entre o tempo de fim e o tempo zero
+        Diff = sub_timestamp(zero, endTime);      // Diff é a diferença entre o tempo de fim e o tempo zero
                                                   // "Diff" é o tempo que a tarefa demorou a ser executada
 
-        sleepTime = difference(Diff, deadlineTime); // sleepTime = deadlineTime - endTime
+        sleepTime = sub_timestamp(Diff, deadlineTime); // sleepTime = deadlineTime - endTime
 
         entryTable[counter].deadline = deadlineTime;
         entryTable[counter].activation = activationTime;
@@ -146,15 +151,15 @@ void *t2(void *arguments)
         }
 
         clock_gettime(CLOCK_MONOTONIC, &beginTime); // get the task' begin time
-        beginTime = difference(zero, beginTime);
+        beginTime = sub_timestamp(zero, beginTime);
         printf("estou %d aqui", entryTable->task);
         func[1](2, 2); // calls the function f2
         // f2(CLASS, GROUP); // call function f2
 
         clock_gettime(CLOCK_MONOTONIC, &endTime); // get the task' end time
-        Diff = difference(zero, endTime);
+        Diff = sub_timestamp(zero, endTime);
 
-        sleepTime = difference(Diff, deadlineTime); // sleepTime = deadlineTime - endTime
+        sleepTime = sub_timestamp(Diff, deadlineTime); // sleepTime = deadlineTime - endTime
 
         entryTable[counter].deadline = deadlineTime;
         entryTable[counter].activation = activationTime;
@@ -208,14 +213,14 @@ void *t3(void *arguments) // threads for function f3
         }
 
         clock_gettime(CLOCK_MONOTONIC, &beginTime); // get the task' begin time
-        beginTime = difference(zero, beginTime);
+        beginTime = sub_timestamp(zero, beginTime);
 
         func[2](3, 3);
         // f3(CLASS, GROUP);
 
         clock_gettime(CLOCK_MONOTONIC, &endTime); // get the task' end time
-        Diff = difference(zero, endTime);
-        sleepTime = difference(Diff, deadlineTime); // sleepTime = deadlineTime - endTime
+        Diff = sub_timestamp(zero, endTime);
+        sleepTime = sub_timestamp(Diff, deadlineTime); // sleepTime = deadlineTime - endTime
 
         entryTable[counter].deadline = deadlineTime;
         entryTable[counter].activation = activationTime;
@@ -239,15 +244,28 @@ void *t3(void *arguments) // threads for function f3
 //===============================================================================
 int main(int argc, char **argv)
 {
-    pthread_t threads[3];
-    int i = 0;
-    pthread_attr_t attr1, attr2, attr3;
-    int inheritsched1, inheritsched2, inheritsched3;
-    struct timespec biggestTime[3], smallestTime[3], jitter[3];
+    pthread_t threads[THREADS_NUM];
+    pthread_attr_t attr[THREADS_NUM];
+    int inheritsched[THREADS_NUM];
+
+    struct timespec biggestTime[THREADS_NUM], smallestTime[THREADS_NUM], jitter[THREADS_NUM];
     struct timespec responseTime;
+
+    int i = 0;
+
     cpu_set_t set;
 
+    // Get initial time
     clock_gettime(CLOCK_MONOTONIC, &zero); // get the time when the program starts
+
+    // Set CPU affinity (run the process only on CPU 0)
+    CPU_ZERO(&set);
+    CPU_SET(0, &set);
+    if (sched_setaffinity(getpid(), sizeof(set), &set) == -1)
+    {
+        perror("sched_setaffinity failed");
+        exit(1);
+    }
 
     // Lock all pages mapped into the address space of the calling process
     if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1)
@@ -255,19 +273,12 @@ int main(int argc, char **argv)
         perror("mlockall failed");
         exit(1);
     }
-    CPU_ZERO(&set);
-    CPU_SET(0, &set);
-    printf("mask cpu 0\n");
-    if (sched_setaffinity(0, sizeof(cpu_set_t), &set) == -1)
-    {
-        perror("sched_setaffinity failed");
-        exit(1);
-    }
 
+    // ================================== THREADS ==================================
     printf("main: creating thread for F1.\n");
-    threads[i] = i;
+    // threads[i] = i;
 
-    inheritsched1 = PTHREAD_EXPLICIT_SCHED; // Inherit scheduler = PTHREAD_INHERIT_SCHED
+    inheritsched[i] = PTHREAD_EXPLICIT_SCHED; // Inherit scheduler = PTHREAD_INHERIT_SCHED
 
     /*
      * PTHREAD_INHERIT_SCHED:
@@ -279,7 +290,7 @@ int main(int argc, char **argv)
      * their scheduling attributes from the values specified by the attributes object.
      */
 
-    if (pthread_attr_setinheritsched(&attr1, inheritsched1) != 0)
+    if (pthread_attr_setinheritsched(&attr[i], inheritsched[i]) != 0)
     {
         printf("Failed attributing inherence attribuits 1.\n");
         exit(1);
@@ -298,10 +309,10 @@ int main(int argc, char **argv)
     i++; // increment counter i to create the next thread
 
     printf("\nCreating thread for F2\n");
-    threads[i] = i;
+    // threads[i] = i;
 
-    inheritsched2 = PTHREAD_EXPLICIT_SCHED;
-    if (pthread_attr_setinheritsched(&attr2, inheritsched2) != 0)
+    inheritsched[i] = PTHREAD_EXPLICIT_SCHED;
+    if (pthread_attr_setinheritsched(&attr[2], inheritsched[i]) != 0)
     {
         printf("Failed attributing inherence attribuits 2.\n");
         exit(1);
@@ -317,10 +328,10 @@ int main(int argc, char **argv)
     // ============================ F3 ==============================
     i++;
     printf("\nCreating thread for F3\n");
-    threads[i] = i;
+    // threads[i] = i;
 
-    inheritsched3 = PTHREAD_EXPLICIT_SCHED;
-    if (pthread_attr_setinheritsched(&attr3, inheritsched3) != 0)
+    inheritsched[i] = PTHREAD_EXPLICIT_SCHED;
+    if (pthread_attr_setinheritsched(&attr[3], inheritsched[i]) != 0)
     {
         printf("Failed attributing inherence attribuits 3.\n");
         exit(1);
@@ -379,7 +390,7 @@ int main(int argc, char **argv)
         printf("Response time: %ld.%ld\n", responseTime.tv_sec, responseTime.tv_nsec);
 
         // calculate the response time
-        responseTime = difference(entryTable[j].activation, entryTable[j].end);
+        responseTime = sub_timestamp(entryTable[j].activation, entryTable[j].end);
         switch (entryTable[j].task)
         {
         case 1: // task 1
@@ -426,23 +437,23 @@ int main(int argc, char **argv)
     }
     for (int i = 0; i < 3; i++)
     {
-        jitter[i] = difference(smallestTime[i], biggestTime[i]); // calculate the jitter
+        jitter[i] = sub_timestamp(smallestTime[i], biggestTime[i]); // calculate the jitter
         printf("Jitter: %ld.%ld\n", jitter[i].tv_sec, jitter[i].tv_nsec);
     }
     return 0;
 }
 // ==========================================================
-struct timespec difference(const struct timespec begin, const struct timespec end)
-{
-    struct timespec calc;
+// struct timespec difference(const struct timespec begin, const struct timespec end)
+// {
+//     struct timespec calc;
 
-    calc.tv_sec = end.tv_sec - begin.tv_sec;
-    calc.tv_nsec = end.tv_nsec - begin.tv_nsec;
+//     calc.tv_sec = end.tv_sec - begin.tv_sec;
+//     calc.tv_nsec = end.tv_nsec - begin.tv_nsec;
 
-    if (calc.tv_nsec < 0)
-    {
-        calc.tv_sec -= 1;
-        calc.tv_nsec += 1E9;
-    }
-    return calc;
-}
+//     if (calc.tv_nsec < 0)
+//     {
+//         calc.tv_sec -= 1;
+//         calc.tv_nsec += 1E9;
+//     }
+//     return calc;
+// }

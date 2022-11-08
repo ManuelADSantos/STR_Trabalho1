@@ -25,13 +25,6 @@ int main(int argc, char **argv)
     double times[3][2] = {{__DBL_MAX__, 0}, {__DBL_MAX__, 0}, {__DBL_MAX__, 0}};
     cpu_set_t mask;
 
-    // Lock all pages mapped into the address space of the calling process
-    if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1)
-    {
-        perror("mlockall failed");
-        exit(1);
-    }
-
     // Set CPU affinity (run the process only on CPU 0)
     CPU_ZERO(&mask);
     CPU_SET(0, &mask);
@@ -42,6 +35,13 @@ int main(int argc, char **argv)
     }
 
     printf("\n");
+
+    // Lock all pages mapped into the address space of the calling process
+    if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1)
+    {
+        perror("mlockall failed");
+        exit(1);
+    }
 
     // Measure computation times
     for (int j = 0; j < 3; j++)
