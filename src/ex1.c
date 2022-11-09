@@ -12,6 +12,7 @@
 #include "timestamps.h"
 
 #define TEST_ITERATIONS 50
+#define NUM_THREADS 3
 #define CLASS 1
 #define GROUP 1
 
@@ -24,8 +25,8 @@ const void (*func[])(int, int) = {f1, f2, f3};
 int main(int argc, char **argv)
 {
     struct timespec start, stop;
-    double calc = 0;
-    double times[3][2] = {{__DBL_MAX__, 0}, {__DBL_MAX__, 0}, {__DBL_MAX__, 0}};
+    double calc = 0.0;
+    double times[3][2] = {{__DBL_MAX__, 0.0}, {__DBL_MAX__, 0.0}, {__DBL_MAX__, 0.0}};
     cpu_set_t mask;
 
     // Set CPU affinity (run the process only on CPU 0)
@@ -47,7 +48,7 @@ int main(int argc, char **argv)
     }
 
     // Measure computation times
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < NUM_THREADS; j++)
     {
         for (int i = 0; i < TEST_ITERATIONS; i++)
         {
