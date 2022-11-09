@@ -37,6 +37,8 @@ struct LogTable
 
 struct LogTable *regists[NUM_THREADS];
 
+pthread_t threads[NUM_THREADS];
+
 //===================================================================================================
 //======================================  Thread Routine  ===========================================
 //===================================================================================================
@@ -48,8 +50,11 @@ void *threadRoutine(void *id)
     // Allocate memory for regists
     regists[threadId] = (struct LogTable *)malloc(sizeof(struct LogTable) * runs[threadId]);
 
-    struct timespec start, stop, period;
+    struct timespec start, stop, period, now;
     int count = 0;
+
+    // Only invert 1 time each
+    int doneInv[] = {1, 1};
 
     // Set period
     period.tv_sec = 0;
@@ -96,6 +101,28 @@ void *threadRoutine(void *id)
         // Check if test time is over
         if (time_between_timestamp(regists[threadId][count].activation, finalHour) < 0)
             break;
+
+        // Invert priorities (stars at RMPO)
+        clock_gettime(CLOCK_MONOTONIC, &now);
+
+        // Invert to Inverse RMPO at t = 1950 ms (1.95 s)
+        if (time_between_timestamp(zeroHour, now) - 2000.0 >= 1950.0 && doneInv[0])
+        {
+            // Inverse priorities
+            pthread_setschedprio(threads[threadId], sched_get_priority_min(SCHED_FIFO) + threadId);
+            printf("--> Set Inverse RMPO for thread %d <--\n", threadId);
+            // Only do this change once per thread
+            doneInv[0] = 0;
+        }
+        // Invert to Inverse RMPO at t = 3950 ms (3.95 s)
+        if (time_between_timestamp(zeroHour, now) - 2000.0 >= 3950.0 && doneInv[1])
+        {
+            // Inverse priorities
+            pthread_setschedprio(threads[threadId], sched_get_priority_max(SCHED_FIFO) - threadId);
+            printf("--> Set RMPO for thread %d <--\n", threadId);
+            // Only do this change once per thread
+            doneInv[1] = 0;
+        }
     }
     return NULL;
 }
@@ -105,7 +132,6 @@ void *threadRoutine(void *id)
 //===================================================================================================
 int main(int argc, char **argv)
 {
-    pthread_t threads[NUM_THREADS];
     pthread_attr_t attributes[NUM_THREADS];
     struct sched_param schedule;
 
