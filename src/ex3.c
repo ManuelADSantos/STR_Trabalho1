@@ -201,7 +201,7 @@ int main(int argc, char **argv)
         biggestTime = 0;
         smallestTime = __DBL_MAX__;
 
-        printf("        ==================== Thread[%d] Informations ====================\n", i);
+        printf(" ============================== Thread[%d] Informations ==============================\n", i);
 
         for (int j = 0; j < runs[i]; j++)
         {
