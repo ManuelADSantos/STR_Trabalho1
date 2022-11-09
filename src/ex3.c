@@ -216,9 +216,11 @@ int main(int argc, char **argv)
 
             // Calculate missed deadline
             if (time_between_timestamp(regists[i][j].end, regists[i][j].deadline) > 0)
-                printf("    Thread[%d]: Met    deadline in iteration %3d, with computation time = %3.4f ms\n", i, j, duration);
+                printf("    Thread[%d]: Met    deadline in iteration %3d, with computation time = %3.4f ms (from %gms to %gms) \n",
+                       i, j, duration, time_between_timestamp(zeroHour, regists[i][j].begin) - 2000, time_between_timestamp(zeroHour, regists[i][j].end) - 2000);
             else
-                printf("    Thread[%d]: Missed deadline in iteration %3d, with computation time = %3.4f ms\n", i, j, duration);
+                printf("    Thread[%d]: Missed deadline in iteration %3d, with computation time = %3.4f ms (from %gms to %gms) \n",
+                       i, j, duration, time_between_timestamp(zeroHour, regists[i][j].begin) - 2000, time_between_timestamp(zeroHour, regists[i][j].end) - 2000);
         }
         // Calculate jitter
         jitter = biggestTime - smallestTime;
