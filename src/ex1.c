@@ -15,6 +15,9 @@
 #define CLASS 1
 #define GROUP 1
 
+// Functions
+const void (*func[])(int, int) = {f1, f2, f3};
+
 // =================================================================================================
 //                                              MAIN
 // =================================================================================================
@@ -55,12 +58,7 @@ int main(int argc, char **argv)
                 exit(-1);
             }
 
-            if (j == 0)
-                f1(CLASS, GROUP);
-            if (j == 1)
-                f2(CLASS, GROUP);
-            if (j == 2)
-                f3(CLASS, GROUP);
+            func[j](CLASS, GROUP);
 
             // Get timestamp after computation
             if (clock_gettime(CLOCK_REALTIME, &stop) == -1)

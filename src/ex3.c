@@ -15,6 +15,7 @@
 #define GROUP 1
 #define NUM_THREADS 3
 #define TEST_TIME 6.0
+#define DELAY 2
 
 // Functions
 const void (*func[])(int, int) = {f1, f2, f3};
@@ -23,20 +24,15 @@ const void (*func[])(int, int) = {f1, f2, f3};
 struct timespec zeroHour, finalHour;
 
 // Auxiliar Variables
-struct timespec biggestTime[NUM_THREADS], smallestTime[NUM_THREADS];
-double jitter[NUM_THREADS];
 const int periods[] = {100.0, 200.0, 300.0}; // in milliseconds
 int runs[NUM_THREADS];
 
 // Regist all values and times of interest
 struct LogTable
 {
-    int function;
     int iteration;
-    struct timespec activation;
-    struct timespec begin;
-    struct timespec end;
-    struct timespec deadline;
+    struct timespec activation, deadline;
+    struct timespec begin, end;
 };
 
 struct LogTable *regists[NUM_THREADS];
@@ -46,20 +42,61 @@ struct LogTable *regists[NUM_THREADS];
 //===================================================================================================
 void *threadRoutine(void *id)
 {
+    // ID of the thread
     int threadId = *(int *)id;
-    // printf("Im in threadRoutine of thread number %d\n", threadId);
-
-    // Initialize general stats
-    biggestTime[threadId].tv_sec = 0;
-    biggestTime[threadId].tv_nsec = 0;
-    smallestTime[threadId].tv_sec = 3600;
-    smallestTime[threadId].tv_nsec = 1e10;
-    jitter[threadId] = 0;
-    jitter[threadId] = 0;
 
     // Allocate memory for regists
     regists[threadId] = (struct LogTable *)malloc(sizeof(struct LogTable) * runs[threadId]);
 
+    struct timespec start, stop, period;
+    int count = 0;
+
+    // Set period
+    period.tv_sec = 0;
+    period.tv_nsec = periods[threadId] * 1e6;
+
+    // First activation time and deadline
+    regists[threadId][count].activation = zeroHour;
+    regists[threadId][count].activation.tv_sec += DELAY;
+    regists[threadId][count].deadline = regists[threadId][count].activation;
+    regists[threadId][count].deadline = sum_timestamp(regists[threadId][count].deadline, period);
+
+    while (1)
+    {
+        // Wait for activation time
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &regists[threadId][count].activation, NULL);
+        // Get timestamp before computation
+        if (clock_gettime(CLOCK_MONOTONIC, &start) == -1)
+        {
+            perror("clock gettime");
+            exit(-1);
+        }
+
+        // Call function
+        func[threadId](CLASS, GROUP);
+
+        // Get timestamp after computation
+        if (clock_gettime(CLOCK_MONOTONIC, &stop) == -1)
+        {
+            perror("clock gettime");
+            exit(-1);
+        }
+
+        // Save values
+        regists[threadId][count].iteration = count;
+        regists[threadId][count].begin = start;
+        regists[threadId][count].end = stop;
+
+        // Update stats
+        count++;
+
+        regists[threadId][count].activation = sum_timestamp(regists[threadId][count - 1].activation, period);
+        regists[threadId][count].deadline = sum_timestamp(regists[threadId][count].activation, period);
+
+        // Check if test time is over
+        if (time_between_timestamp(regists[threadId][count].activation, finalHour) < 0)
+            break;
+    }
     return NULL;
 }
 
@@ -73,13 +110,6 @@ int main(int argc, char **argv)
     struct sched_param schedule;
 
     cpu_set_t set;
-
-    // Get initial time
-    if (clock_gettime(CLOCK_MONOTONIC, &zeroHour) == -1)
-    {
-        printf("Error getting initial time...\n");
-        exit(-1);
-    }
 
     // Set CPU affinity (run the process only on CPU 0)
     CPU_ZERO(&set);
@@ -97,27 +127,24 @@ int main(int argc, char **argv)
         exit(-1);
     }
 
-    // // Setting all values of registers
-    // for (int index = 0; index < NUM_THREADS; index++) // set everything to 0
-    // {
-    //     biggestTime[index].tv_sec = 0;
-    //     biggestTime[index].tv_nsec = 0;
-    //     smallestTime[index].tv_sec = 3600;
-    //     smallestTime[index].tv_nsec = 1e10;
-    //     jitter[index] = 0;
-    //     jitter[index] = 0;
-    // }
-
     // Calculate the maximum running times of each function
     for (int i = 0; i < NUM_THREADS; i++)
-    {
         runs[i] = 1 + (TEST_TIME * 1e3 / periods[i]);
+
+    // Get initial time
+    if (clock_gettime(CLOCK_MONOTONIC, &zeroHour) == -1)
+    {
+        printf("Error getting initial time...\n");
+        exit(-1);
     }
+    // Calculate final time
+    finalHour = zeroHour;
+    finalHour.tv_sec += (DELAY + TEST_TIME);
 
     // ================================== THREADS ==================================
     for (int i = 0; i < NUM_THREADS; i++)
     {
-        printf(" Main: creating thread %d for function %d\n", i, i + 1);
+        // printf(" Main: creating thread %d for function %d\n", i, i + 1);
 
         // Initialize thread attributes
         if (pthread_attr_init(&attributes[i]) != 0)
@@ -167,16 +194,38 @@ int main(int argc, char **argv)
     for (int i = 0; i < NUM_THREADS; i++)
         pthread_join(threads[i], NULL);
 
-    // Print results of execution
+    // Calculate and print results of execution
+    double duration, jitter, biggestTime, smallestTime;
     for (int i = 0; i < NUM_THREADS; i++)
     {
+        biggestTime = 0;
+        smallestTime = __DBL_MAX__;
+
+        printf("        ==================== Thread[%d] Informations ====================\n", i);
+
         for (int j = 0; j < runs[i]; j++)
         {
-            //     printf("Task %d: activation time: %ld.%09ld, deadline: %ld.%09ld, begin: %ld.%09ld, end: %ld.%09ld )");
-            // }
-            // jitter[i] = time_between_timestamp(smallestTime[i], biggestTime[i]); // calculate the jitter
-            // printf("Jitter: %g\n", jitter[i]);
+            // Calculate execution time
+            duration = time_between_timestamp(regists[i][j].begin, regists[i][j].end);
+
+            // Check max and min
+            if (duration > biggestTime)
+                biggestTime = duration;
+            if (duration < smallestTime)
+                smallestTime = duration;
+
+            // Calculate missed deadline
+            if (time_between_timestamp(regists[i][j].end, regists[i][j].deadline) > 0)
+                printf("    Thread[%d]: Met    deadline in iteration %3d, with computation time = %3.4f ms\n", i, j, duration);
+            else
+                printf("    Thread[%d]: Missed deadline in iteration %3d, with computation time = %3.4f ms\n", i, j, duration);
         }
+        // Calculate jitter
+        jitter = biggestTime - smallestTime;
+
+        // Show results
+        printf("\n Thread[%d] Stats -->  Max = %g ms || Min = %g ms || Jitter = %g ms\n\n\n", i, biggestTime, smallestTime, jitter);
+
         free(regists[i]);
     }
 
