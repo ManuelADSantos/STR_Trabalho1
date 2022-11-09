@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     if (sched_setaffinity(getpid(), sizeof(mask), &mask) == -1)
     {
         perror("sched_setaffinity failed");
-        exit(1);
+        exit(-1);
     }
 
     printf("\n");
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1)
     {
         perror("mlockall failed");
-        exit(1);
+        exit(-1);
     }
 
     // Measure computation times
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
             if (clock_gettime(CLOCK_REALTIME, &start) == -1)
             {
                 perror("clock gettime");
-                exit(1);
+                exit(-1);
             }
 
             if (j == 0)
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
             if (clock_gettime(CLOCK_REALTIME, &stop) == -1)
             {
                 perror("clock gettime");
-                exit(1);
+                exit(-1);
             }
 
             // Calculate time between timestamps

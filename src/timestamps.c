@@ -63,6 +63,7 @@ struct timespec sum_timestamp(struct timespec begin, struct timespec end)
     return result;
 }
 
+// Returns time in milliseconds
 double time_between_timestamp(struct timespec begin, struct timespec end)
 {
     struct timespec calc;
@@ -71,3 +72,12 @@ double time_between_timestamp(struct timespec begin, struct timespec end)
 
     return result;
 }
+
+// double milliseconds_timestamp(struct timespec begin)
+// {
+//     struct timespec calc;
+//     calc = sub_timestamp(begin, end);
+//     double result = (calc.tv_sec) * 1e3 + (calc.tv_nsec) / 1e6;
+
+//     return result;
+// }
