@@ -11,7 +11,7 @@
 #include "func.h"
 #include "timestamps.h"
 
-#define TEST_ITERATIONS 25
+#define TEST_ITERATIONS 15
 #define NUM_THREADS 3
 #define NUM_CLASSES 3
 #define NUM_GROUPS 15
