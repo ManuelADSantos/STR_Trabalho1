@@ -1,41 +1,56 @@
 # STR
 
-## Exercício  1
-
-Compilar
+## Exercício 1 - Medir tempos de computação 
+Compilar exercício 1
 ```bash
-sudo gcc -Wall -O2 -D_REENTRANT ex1.c func.o timestamps.c -o ex1 -lpthread -lrt
+make ex1
 ```
-
 Correr
 ```bash
 sudo ./ex1
 ```
 
 
-## Exercício  3
-
-Compilar
+## Exercício 3 - Medir tempos com escalonamentos RMPO e RMPO Inverso
+Compilar exercício 3 com escalonamento RMPO
 ```bash
-sudo gcc -Wall -O2 -D_REENTRANT ex3.c func.o timestamps.c -o ex3 -lpthread -lrt
+make ex3_RMPO
 ```
-
 Correr
 ```bash
-sudo ./ex3
+sudo ./ex3_RMPO
 ```
 
-
-## Exercício  4 (Alternativa A)
-
-Compilar
+Compilar exercício 3 com escalonamento RMPO Inverso
 ```bash
-sudo gcc -Wall -O2 -D_REENTRANT ex4_A.c func.o timestamps.c -o ex4_A -lpthread -lrt
+make ex3_InvRMPO
+```
+Correr
+```bash
+sudo ./ex3_InvRMPO
 ```
 
+
+## Exercício  4 (Alternativa A) - Alternar RMPO com RMPO Inverso
+Compilar exercício 4 (a começar com RMPO)
+```bash
+make ex4_A
+```
 Correr
 ```bash
 sudo ./ex4_A
+```
+
+
+## Exercício  5
+Compilar
+```bash
+make ex6
+```
+Compilar
+Correr
+```bash
+sudo ./ex6
 ```
 
 
@@ -43,7 +58,7 @@ sudo ./ex4_A
 
 Compilar
 ```bash
-sudo gcc -Wall -O2 -D_REENTRANT ex6.c func.o timestamps.c -o ex6 -lpthread -lrt
+make ex6
 ```
 
 Correr
