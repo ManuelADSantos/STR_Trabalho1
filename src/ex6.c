@@ -161,14 +161,14 @@ int main(int argc, char **argv)
         }
 
         // Set scheduling policy
-        if (pthread_attr_setschedpolicy(&attributes[i], SCHED_FIFO) != 0)
+        if (pthread_attr_setschedpolicy(&attributes[i], SCHED_RR) != 0)
         {
             printf("Failed setting scheduling policy for thread %d\n", i);
             exit(-1);
         }
 
         // Set threads priorities (works for this case)
-        if ((schedule.sched_priority = sched_get_priority_max(SCHED_FIFO) - i) == -1)
+        if ((schedule.sched_priority = sched_get_priority_max(SCHED_RR)) == -1)
         {
             printf("Failed setting priority for thread %d\n", i);
             exit(-1);

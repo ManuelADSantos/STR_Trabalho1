@@ -24,9 +24,6 @@ void f1(int a, int b)
         }
         if (time_between_timestamp(begin, now) >= 36.001127)
             return;
-
-        // 30 + ()%9
-
         count++;
     }
 }
@@ -50,7 +47,6 @@ void f2(int a, int b)
         }
         if (time_between_timestamp(begin, now) >= 56.001693)
             return;
-
         count++;
     }
 }
@@ -74,7 +70,6 @@ void f3(int a, int b)
         }
         if (time_between_timestamp(begin, now) >= 86.002828)
             return;
-
         count++;
     }
 }
