@@ -27,6 +27,3 @@ ex3_InvRMPO_func2: ex3_InvRMPO.c func2.o timestamps.c
 
 ex4_A_func2: ex4_A.c func2.o timestamps.c 
 	sudo gcc -Wall -O2 -D_REENTRANT ex4_A.c func2.o timestamps.c -o ex4_A -lpthread -lrt
-
-ex6_func2: ex6.c func2.o timestamps.c 
-	sudo gcc -Wall -O2 -D_REENTRANT ex6.c func2.o timestamps.c -o ex6 -lpthread -lrt
