@@ -1,5 +1,17 @@
 # STR
 
+## Compilar todos os exercícios
+```bash
+make all
+```
+
+
+## Limpar todos os executáveis
+```bash
+make clean
+```
+
+
 ## Exercício 1 - Medir tempos de computação 
 ### Compilar exercício 1
 ```bash

@@ -1,3 +1,12 @@
+// =================================================================================================
+//                             STR 22/23 - Pratical Assignment 1
+//                                Daniela Fernandes 2019233462
+//                                  Manuel Santos 2019231352
+//
+// compile: sudo gcc -Wall -O2 -D_REENTRANT ex5_checkTimes.c func.o timestamps.c -o ex5_checkTimes -lpthread -lrt
+//                                       make: make ex5_checkTimes
+//                                      run: sudo ./ex5_checkTimes
+// =================================================================================================
 #define _GNU_SOURCE
 
 #include <stdio.h>

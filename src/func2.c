@@ -1,4 +1,10 @@
-// gcc -Wall -O2 -D_REENTRANT func2.c -c
+// =================================================================================================
+//                             STR 22/23 - Pratical Assignment 1
+//                                Daniela Fernandes 2019233462
+//                                  Manuel Santos 2019231352
+//
+//                      compile: gcc -Wall -O2 -D_REENTRANT func2.c -c
+// =================================================================================================
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>

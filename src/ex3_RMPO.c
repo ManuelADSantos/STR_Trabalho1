@@ -1,3 +1,16 @@
+// =================================================================================================
+//                             STR 22/23 - Pratical Assignment 1
+//                                Daniela Fernandes 2019233462
+//                                  Manuel Santos 2019231352
+//
+// compile: sudo gcc -Wall -O2 -D_REENTRANT ex3_RMPO.c func.o timestamps.c -o ex3_RMPO -lpthread -lrt
+//                                       make: make ex3_RMPO
+//                                      run: sudo ./ex3_RMPO
+//
+//  compile: sudo gcc -Wall -O2 -D_REENTRANT ex3_RMPO.c func2.o timestamps.c -o ex3_RMPO_func2 -lpthread -lrt
+//                                   make: make ex3_RMPO_func2
+//                                  run: sudo ./ex3_RMPO_func2
+// =================================================================================================
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <time.h>

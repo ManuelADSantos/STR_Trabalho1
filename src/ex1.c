@@ -1,3 +1,16 @@
+// =================================================================================================
+//                             STR 22/23 - Pratical Assignment 1
+//                                Daniela Fernandes 2019233462
+//                                  Manuel Santos 2019231352
+//
+//      compile: sudo gcc -Wall -O2 -D_REENTRANT ex1.c func.o timestamps.c -o ex1 -lpthread -lrt
+//                                       make: make ex1
+//                                      run: sudo ./ex1
+//
+//  compile: sudo gcc -Wall -O2 -D_REENTRANT ex1.c func2.o timestamps.c -o ex1_func2 -lpthread -lrt
+//                                    make: make ex1_func2
+//                                   run: sudo ./ex1_func2
+// =================================================================================================
 #define _GNU_SOURCE
 
 #include <stdio.h>
