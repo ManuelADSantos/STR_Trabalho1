@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <limits.h>
+#include <math.h>
 
 #include "func.h"
 #include "timestamps.h"
@@ -33,7 +34,7 @@ const void (*func[])(int, int) = {f1, f2, f3};
 struct timespec zeroHour, finalHour;
 
 // Auxiliar Variables
-const int periods[] = {100.0, 200.0, 300.0}; // in milliseconds
+const int periods[] = {100.0, 200.0, 343.0}; // in milliseconds
 int runs[NUM_THREADS];
 
 // Regist all values and times of interest
@@ -138,7 +139,7 @@ int main(int argc, char **argv)
 
     // Calculate the maximum running times of each function
     for (int i = 0; i < NUM_THREADS; i++)
-        runs[i] = 1 + (TEST_TIME * 1e3 / periods[i]);
+        runs[i] = 1 + ceil((TEST_TIME * 1e3 / periods[i]));
 
     // Get initial time
     if (clock_gettime(CLOCK_MONOTONIC, &zeroHour) == -1)

@@ -28,7 +28,7 @@ void f1(int a, int b)
             printf("Error obtaining f1 now time\n");
             exit(-1);
         }
-        if (time_between_timestamp(begin, now) >= 36.001127)
+        if (time_between_timestamp(begin, now) >= 36.027659)
             return;
         count++;
     }
@@ -51,7 +51,7 @@ void f2(int a, int b)
             printf("Error obtaining f2 now time\n");
             exit(-1);
         }
-        if (time_between_timestamp(begin, now) >= 56.001693)
+        if (time_between_timestamp(begin, now) >= 56.074312)
             return;
         count++;
     }
@@ -74,7 +74,7 @@ void f3(int a, int b)
             printf("Error obtaining f3 now time\n");
             exit(-1);
         }
-        if (time_between_timestamp(begin, now) >= 86.002828)
+        if (time_between_timestamp(begin, now) >= 86.061494)
             return;
         count++;
     }
