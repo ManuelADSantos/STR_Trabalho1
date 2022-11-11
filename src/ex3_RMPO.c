@@ -225,7 +225,7 @@ int main(int argc, char **argv)
             // Check max and min
             if (duration > biggestTime)
                 biggestTime = duration;
-            if (duration < smallestTime)
+            if (duration < smallestTime && duration > 0.0)
                 smallestTime = duration;
 
             // Calculate missed deadline

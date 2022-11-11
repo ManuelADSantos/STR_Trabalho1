@@ -83,7 +83,7 @@ int main(int argc, char **argv)
                     calc = time_between_timestamp(start, stop);
                     // printf("Calc = %g\n", calc);
                     //  Record minimum and maximum times
-                    if (calc < times[j][0])
+                    if (calc < times[j][0] && calc > 0.0)
                     {
                         times[j][0] = calc;
                         // printf("Novo min (func1) = %lf ms (iteracao %d)\n", calc, i);

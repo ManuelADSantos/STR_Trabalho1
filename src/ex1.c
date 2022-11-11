@@ -84,15 +84,15 @@ int main(int argc, char **argv)
             // Calculate time between timestamps
             calc = time_between_timestamp(start, stop);
             // Record minimum and maximum times
-            if (calc < times[j][0])
+            if (calc < times[j][0] && calc > 0.0)
             {
                 times[j][0] = calc;
-                printf("Novo min (func %d) = %lf ms (iteracao %d)\n", j, calc, i);
+                printf("Novo min (func %d) = %lf ms (iteracao %d)\n", j + 1, calc, i);
             }
             if (calc > times[j][1])
             {
                 times[j][1] = calc;
-                printf("Novo MAX (func %d) = %lf ms (iteracao %d)\n", j, calc, i);
+                printf("Novo MAX (func %d) = %lf ms (iteracao %d)\n", j + 1, calc, i);
             }
         }
         printf("\n");
